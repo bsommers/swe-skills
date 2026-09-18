@@ -23,6 +23,16 @@ Conducts a multi-tiered architecture and code review of any codebase using graph
   4. Recommended Improvements (Prioritized Roadmap: P0/P1/P2/P3 with code refactoring snippets)
   5. Security Review Recommendations (Cross-referencing OWASP/CVE and suggesting automated security scans)
 
+### 2. `release`
+**Path:** [`skills/release/SKILL.md`](file:///Users/bill/src/swe-skills/skills/release/SKILL.md)
+
+Automates the Semantic Versioning (SemVer 2.0.0) release workflow:
+- **Intelligent SemVer Bump**: Inspects commit logs and diffs to automatically determine major, minor, or patch increments based on change significance.
+- **Automated Changelog Generation**: Updates `CHANGELOG.md` following the Keep a Changelog format.
+- **Annotated Git Tags**: Creates signed/annotated git tags (`git tag -a vX.Y.Z -m "..."`).
+- **Safe Remote Push**: Automatically pushes commits and release tags to the remote repository (`git push && git push --tags`).
+- **CLI Release Tool**: Includes [`skills/release/scripts/release.sh`](file:///Users/bill/src/swe-skills/skills/release/scripts/release.sh) with `--dry-run`, `--minor`, `--patch`, and `--major` options.
+
 ---
 
 ## Multi-Agent Compatibility Guide
