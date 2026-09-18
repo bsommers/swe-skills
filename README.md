@@ -38,18 +38,37 @@ This skill is designed to work across all AI coding assistants:
 
 ---
 
-## Quick Installation to Agent Configs
+## Quick Installation via Installer Script
+
+Use the built-in universal installer [`install.sh`](file:///Users/bill/src/swe-skills/install.sh):
 
 ```bash
-# For Antigravity (global):
-mkdir -p ~/.gemini/config/skills
-cp -r skills/code-architecture-review ~/.gemini/config/skills/
+# 1. Interactive wizard (prompts for skills, agents, scope, and mode):
+./install.sh
 
-# For Claude Code (global):
-mkdir -p ~/.claude/skills
-cp -r skills/code-architecture-review ~/.claude/skills/
+# 2. Install all skills globally for all supported agents (agy, claude, cursor):
+./install.sh --scope global --agents all
 
-# For Project-local (.agents):
-mkdir -p .agents/skills
-cp -r skills/code-architecture-review .agents/skills/
+# 3. Install locally into a specific target project:
+./install.sh --scope local --agents all --target /path/to/my-project
+
+# 4. Install specific skill for Claude Code and Antigravity only:
+./install.sh --skills code-architecture-review --agents agy,claude --scope global
+
+# 5. List available skills:
+./install.sh --list
+
+# 6. Uninstall:
+./install.sh --uninstall --agents all --scope global
 ```
+
+### Supported Installer Flags:
+| Flag | Description | Options |
+| :--- | :--- | :--- |
+| `-s, --scope` | Installation scope | `global`, `local`, `both` |
+| `-a, --agents` | Target agents | `agy`, `claude`, `cursor`, `all` (comma-separated) |
+| `-k, --skills` | Specific skills to install | `<skill-name>`, `all` |
+| `-t, --target` | Local destination repository | Defaults to current working directory |
+| `-m, --mode` | Link or copy mode | `symlink` (default, auto-syncs edits), `copy` |
+| `-u, --uninstall`| Remove installed skills | Boolean flag |
+| `-l, --list` | List all available skills | Displays name and descriptions |
