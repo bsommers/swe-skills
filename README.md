@@ -45,6 +45,14 @@ Automates the Semantic Versioning (SemVer 2.0.0) release workflow:
 - **Safe Remote Push**: Automatically pushes commits and release tags to the remote repository (`git push && git push --tags`).
 - **CLI Release Tool**: Includes [`skills/release/scripts/release.sh`](file:///Users/bill/src/swe-skills/skills/release/scripts/release.sh) with `--dry-run`, `--minor`, `--patch`, and `--major` options.
 
+### 4. `github-issues-script`
+**Path:** [`skills/github-issues-script/SKILL.md`](file:///Users/bill/src/swe-skills/skills/github-issues-script/SKILL.md)
+
+Prepares and converts code review findings, architectural debt, or task backlogs into a structured, reviewable batch script (`scripts/create_issues.sh`) for GitHub:
+- **Best Practice Issue Anatomy**: Formats every issue with Summary, Exact File Coordinates (`file#L12-L34`), Impact/Risk analysis, Recommended Remediation (with Before/After code snippets), and References.
+- **Human Reviewable & Safe**: Outputs a standalone script supporting `--dry-run`, per-issue interactive confirmation, and custom `--repo` targeting.
+- **Robust Shell Quoting**: Employs EOF heredocs to prevent escaping issues with markdown code blocks and backticks.
+
 ---
 
 ## Multi-Agent Compatibility Guide
