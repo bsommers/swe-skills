@@ -23,7 +23,19 @@ Conducts a multi-tiered architecture and code review of any codebase using graph
   4. Recommended Improvements (Prioritized Roadmap: P0/P1/P2/P3 with code refactoring snippets)
   5. Security Review Recommendations (Cross-referencing OWASP/CVE and suggesting automated security scans)
 
-### 2. `release`
+### 2. `test-coverage`
+**Path:** [`skills/test-coverage/SKILL.md`](file:///Users/bill/src/swe-skills/skills/test-coverage/SKILL.md)
+
+Audits a repository's test suite and produces real coverage analysis — not just "tests pass." Detects the language/framework, runs the appropriate coverage tool, and generates a prioritized (P0 critical-path / P1 core-logic / P2 edge-case) gap-closing plan saved into the repo.
+
+#### Key Features:
+- **Multi-Language Coverage Matrix**: `references/COVERAGE_TOOLS_MATRIX.md` maps 10 ecosystems (Bash, JS/TS, Python, Go, Rust, Java, Ruby, C/C++, .NET, PHP) to their coverage tooling.
+- **Empirically-Verified Bash/bats Guidance**: `references/BASH_COVERAGE_NOTES.md` documents real, tested kcov+bats-core failure modes (runaway recursive trap output, silently-zero coverage, per-file misattribution) and the exact flags that avoid them — not assumed from docs.
+- **`shell_function_reachability.sh`**: a zero-dependency, deterministic static coverage fallback for Bash projects — cross-references every defined function against the test corpus, since instrumented coverage tooling for bats-tested shell code is genuinely unreliable.
+- **Shell Test-Quality Checklist**: catches correctness bugs raw coverage percentage can't — `set -e` interaction bugs invisible to bats (which doesn't run under `-e`), unmocked external commands, command-string injection, and silent dispatch-table no-ops.
+- **Prioritized Gap Analysis**: classifies every untested function by what it actually does (security/destructive-path P0, core-logic P1, edge-case P2), not just raw percentage.
+
+### 3. `release`
 **Path:** [`skills/release/SKILL.md`](file:///Users/bill/src/swe-skills/skills/release/SKILL.md)
 
 Automates the Semantic Versioning (SemVer 2.0.0) release workflow:
