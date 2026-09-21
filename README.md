@@ -4,9 +4,29 @@ A collection of specialized, cross-agent skills for software engineering, archit
 
 ---
 
+## Master Router: `/swe`
+
+The **`/swe`** skill serves as the central command router and dispatcher for the entire suite. You can use `/swe` with explicit subcommands or freeform intent:
+
+```bash
+/swe review [path]      # -> code-architecture-review (Graphify/AST review)
+/swe coverage [opts]    # -> test-coverage (multi-language coverage audit)
+/swe release [bump]     # -> release (SemVer bump, CHANGELOG, tag, push)
+/swe issues [plan.md]   # -> github-issues-script (batch GitHub issues)
+/swe install [opts]     # -> runs universal installer
+/swe list               # -> displays skills catalog and usage
+```
+
+---
+
 ## Available Skills
 
-### 1. `code-architecture-review`
+### 1. `swe` (Master Router)
+**Path:** [`skills/swe/SKILL.md`](file:///Users/bill/src/swe-skills/skills/swe/SKILL.md)
+
+Unified entry point and intelligent skill router for the SWE Skills suite. Dispatches subcommands and natural language prompts to the appropriate specialized engineering skill.
+
+### 2. `code-architecture-review`
 **Path:** [`skills/code-architecture-review/SKILL.md`](file:///Users/bill/src/swe-skills/skills/code-architecture-review/SKILL.md)
 
 Conducts a multi-tiered architecture and code review of any codebase using graph-based structural analysis (Graphify/AST), maps major components, performs intra- and inter-module reviews, and generates a structured, prioritized improvement plan saved directly into the repository.
