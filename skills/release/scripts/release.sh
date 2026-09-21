@@ -16,6 +16,7 @@ CYAN="\033[0;36m"
 NC="\033[0m"
 
 DRY_RUN=false
+ASSUME_YES=false
 MANUAL_BUMP=""
 CUSTOM_VERSION=""
 
@@ -28,6 +29,7 @@ usage() {
     echo "  --major           Force MAJOR bump (e.g. 0.1.0 -> 1.0.0)"
     echo "  --version <vX.Y.Z> Specify exact version tag"
     echo "  --dry-run         Preview changes, version bump, and release notes without committing or tagging"
+    echo "  -y, --yes         Push without asking (default: ask on a terminal, skip the push otherwise)"
     echo "  -h, --help        Show this help message"
     echo ""
     exit 0
@@ -41,6 +43,7 @@ while [[ $# -gt 0 ]]; do
         --major) MANUAL_BUMP="major"; shift ;;
         --version) CUSTOM_VERSION="$2"; shift 2 ;;
         --dry-run) DRY_RUN=true; shift ;;
+        -y|--yes) ASSUME_YES=true; shift ;;
         -h|--help) usage ;;
         *) echo -e "${RED}Unknown argument: $1${NC}"; usage ;;
     esac
@@ -235,10 +238,20 @@ REMOTE_NAME=$(git remote | head -n 1 || echo "")
 
 if [ -n "$REMOTE_NAME" ]; then
     echo ""
-    echo -e "${BLUE}Pushing branch and tags to remote '${REMOTE_NAME}'...${NC}"
-    git push "$REMOTE_NAME" "$CURRENT_BRANCH"
-    git push "$REMOTE_NAME" "$NEXT_TAG"
-    echo -e "${GREEN}✓ Successfully pushed release ${NEXT_TAG} to remote '${REMOTE_NAME}'!${NC}"
+    DO_PUSH="$ASSUME_YES"
+    if [ "$DO_PUSH" != true ] && [ -t 0 ]; then
+        read -r -p "Push '${CURRENT_BRANCH}' and tag '${NEXT_TAG}' to remote '${REMOTE_NAME}'? [y/N] " REPLY
+        if [[ "$REPLY" =~ ^[Yy]$ ]]; then DO_PUSH=true; fi
+    fi
+    if [ "$DO_PUSH" = true ]; then
+        echo -e "${BLUE}Pushing branch and tag to remote '${REMOTE_NAME}'...${NC}"
+        git push "$REMOTE_NAME" "$CURRENT_BRANCH"
+        git push "$REMOTE_NAME" "$NEXT_TAG"
+        echo -e "${GREEN}✓ Successfully pushed release ${NEXT_TAG} to remote '${REMOTE_NAME}'!${NC}"
+    else
+        echo -e "${YELLOW}ℹ Not pushed. Release ${NEXT_TAG} exists locally. To publish it:${NC}"
+        echo -e "    git push ${REMOTE_NAME} ${CURRENT_BRANCH} && git push ${REMOTE_NAME} ${NEXT_TAG}"
+    fi
 else
     echo ""
     echo -e "${YELLOW}ℹ Note: No git remote is currently configured.${NC}"

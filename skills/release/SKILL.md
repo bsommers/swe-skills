@@ -130,6 +130,8 @@ git tag -a "vX.Y.Z" -m "Release vX.Y.Z
 
 ## Step 5: Push Commits & Tags to Remote
 
+**Confirm first.** A push is outward-facing and hard to undo. Show the remote, branch, and tag about to be pushed, and wait for an explicit yes. Invoking `/release` or `/swe release` is not consent to push. Without a yes, stop after the local tag and give the push commands.
+
 Verify remote configuration:
 
 ```bash
@@ -154,6 +156,7 @@ fi
 ## Step 6: Helper Script Execution
 
 For automated release execution, agents and users can run the companion script:
+The script asks before pushing when it has a terminal, and skips the push (printing the commands) when it does not. `--yes` pushes without asking, so an agent passes it only after the user has confirmed the push. Run `--dry-run` first.
 
 ```bash
 # Run automated release helper
@@ -164,6 +167,7 @@ For automated release execution, agents and users can run the companion script:
 ./skills/release/scripts/release.sh --patch
 ./skills/release/scripts/release.sh --major
 ./skills/release/scripts/release.sh --dry-run
+./skills/release/scripts/release.sh --yes    # push without prompting (after user confirmation)
 ```
 
 ---
