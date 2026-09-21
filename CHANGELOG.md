@@ -16,3 +16,17 @@ All notable changes to this project will be documented in this file.
 - add cross-agent code-architecture-review skill
 
 
+## [v0.2.0] - 2026-09-21
+
+### Added
+- add /swe master skill router and dispatcher
+- add github-issues-script skill for generating reviewable batch issue scripts
+- add test-coverage skill with shell reachability fallback
+
+### Fixed
+- confirm before pushing a release
+
+### Changed / Maintenance
+- rewrite router as a single route table with gates
+
+
