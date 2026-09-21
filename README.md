@@ -13,21 +13,23 @@ The **`/swe`** skill serves as the central command router and dispatcher for the
 /swe coverage [opts]    # -> test-coverage (multi-language coverage audit)
 /swe release [bump]     # -> release (SemVer bump, CHANGELOG, tag, push)
 /swe issues [plan.md]   # -> github-issues-script (batch GitHub issues)
-/swe install [opts]     # -> runs universal installer
-/swe list               # -> displays skills catalog and usage
+/swe install [opts]     # -> runs universal installer (asks first)
+/swe help               # -> displays the routing table
 ```
+
+Aliases: `arch`, `architecture` (review); `cov` (coverage); `tag`, `semver` (release); `tickets` (issues). Anything else is treated as freeform intent, and an ambiguous request shows the menu. `/swe release` and `/swe install` always ask before pushing or installing.
 
 ---
 
 ## Available Skills
 
 ### 1. `swe` (Master Router)
-**Path:** [`skills/swe/SKILL.md`](file:///Users/bill/src/swe-skills/skills/swe/SKILL.md)
+**Path:** [`skills/swe/SKILL.md`](skills/swe/SKILL.md)
 
-Unified entry point and intelligent skill router for the SWE Skills suite. Dispatches subcommands and natural language prompts to the appropriate specialized engineering skill.
+Entry point for the SWE Skills suite. Dispatches subcommands, and freeform requests that fit exactly one skill, to that skill by name.
 
 ### 2. `code-architecture-review`
-**Path:** [`skills/code-architecture-review/SKILL.md`](file:///Users/bill/src/swe-skills/skills/code-architecture-review/SKILL.md)
+**Path:** [`skills/code-architecture-review/SKILL.md`](skills/code-architecture-review/SKILL.md)
 
 Conducts a multi-tiered architecture and code review of any codebase using graph-based structural analysis (Graphify/AST), maps major components, performs intra- and inter-module reviews, and generates a structured, prioritized improvement plan saved directly into the repository.
 
@@ -44,7 +46,7 @@ Conducts a multi-tiered architecture and code review of any codebase using graph
   5. Security Review Recommendations (Cross-referencing OWASP/CVE and suggesting automated security scans)
 
 ### 2. `test-coverage`
-**Path:** [`skills/test-coverage/SKILL.md`](file:///Users/bill/src/swe-skills/skills/test-coverage/SKILL.md)
+**Path:** [`skills/test-coverage/SKILL.md`](skills/test-coverage/SKILL.md)
 
 Audits a repository's test suite and produces real coverage analysis — not just "tests pass." Detects the language/framework, runs the appropriate coverage tool, and generates a prioritized (P0 critical-path / P1 core-logic / P2 edge-case) gap-closing plan saved into the repo.
 
@@ -56,17 +58,17 @@ Audits a repository's test suite and produces real coverage analysis — not jus
 - **Prioritized Gap Analysis**: classifies every untested function by what it actually does (security/destructive-path P0, core-logic P1, edge-case P2), not just raw percentage.
 
 ### 3. `release`
-**Path:** [`skills/release/SKILL.md`](file:///Users/bill/src/swe-skills/skills/release/SKILL.md)
+**Path:** [`skills/release/SKILL.md`](skills/release/SKILL.md)
 
 Automates the Semantic Versioning (SemVer 2.0.0) release workflow:
 - **Intelligent SemVer Bump**: Inspects commit logs and diffs to automatically determine major, minor, or patch increments based on change significance.
 - **Automated Changelog Generation**: Updates `CHANGELOG.md` following the Keep a Changelog format.
 - **Annotated Git Tags**: Creates signed/annotated git tags (`git tag -a vX.Y.Z -m "..."`).
 - **Safe Remote Push**: Automatically pushes commits and release tags to the remote repository (`git push && git push --tags`).
-- **CLI Release Tool**: Includes [`skills/release/scripts/release.sh`](file:///Users/bill/src/swe-skills/skills/release/scripts/release.sh) with `--dry-run`, `--minor`, `--patch`, and `--major` options.
+- **CLI Release Tool**: Includes [`skills/release/scripts/release.sh`](skills/release/scripts/release.sh) with `--dry-run`, `--minor`, `--patch`, and `--major` options.
 
 ### 4. `github-issues-script`
-**Path:** [`skills/github-issues-script/SKILL.md`](file:///Users/bill/src/swe-skills/skills/github-issues-script/SKILL.md)
+**Path:** [`skills/github-issues-script/SKILL.md`](skills/github-issues-script/SKILL.md)
 
 Prepares and converts code review findings, architectural debt, or task backlogs into a structured, reviewable batch script (`scripts/create_issues.sh`) for GitHub:
 - **Best Practice Issue Anatomy**: Formats every issue with Summary, Exact File Coordinates (`file#L12-L34`), Impact/Risk analysis, Recommended Remediation (with Before/After code snippets), and References.
@@ -90,7 +92,7 @@ This skill is designed to work across all AI coding assistants:
 
 ## Quick Installation via Installer Script
 
-Use the built-in universal installer [`install.sh`](file:///Users/bill/src/swe-skills/install.sh):
+Use the built-in universal installer [`install.sh`](install.sh):
 
 ```bash
 # 1. Interactive wizard (prompts for skills, agents, scope, and mode):
