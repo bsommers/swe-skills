@@ -12,6 +12,10 @@ Dispatches `/swe <subcommand> [args]` to one skill in the suite. It holds no wor
 | Subcommand | Skill | Purpose | Gate |
 | :--- | :--- | :--- | :--- |
 | `review`, `arch`, `architecture` | `code-architecture-review` | Graph-based code and architecture review with an improvement plan | none |
+| `pr`, `diff`, `review-pr` | `pr-review` | Multi-lens PR and git diff review (logic, security, breaking changes, tests) | none |
+| `refactor`, `execute` | `refactor-execute` | Safely execute refactoring tasks step-by-step with green test gates | none |
+| `api`, `schema`, `openapi`, `contract` | `api-contract-audit` | Audit API specifications against backend route implementations for drift | none |
+| `deps`, `dependencies`, `security`, `cve` | `dependency-audit` | Multi-ecosystem package vulnerability (CVE) and outdated library audit | none |
 | `coverage`, `cov` | `test-coverage` | Measure real test coverage and plan gap closing | none |
 | `release`, `tag`, `semver` | `release` | SemVer bump, CHANGELOG, tag, push | **confirm before any push** |
 | `issues`, `tickets` | `github-issues-script` | Turn findings into a reviewable `gh issue create` script | none |

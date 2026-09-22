@@ -10,6 +10,10 @@ The **`/swe`** skill serves as the central command router and dispatcher for the
 
 ```bash
 /swe review [path]      # -> code-architecture-review (Graphify/AST review)
+/swe pr [pr#|branch]    # -> pr-review (multi-lens PR and git diff review)
+/swe refactor [task]    # -> refactor-execute (safe incremental refactoring)
+/swe api [spec.yaml]    # -> api-contract-audit (OpenAPI/GraphQL schema drift)
+/swe deps [opts]        # -> dependency-audit (CVE vulnerability and package audit)
 /swe coverage [opts]    # -> test-coverage (multi-language coverage audit)
 /swe release [bump]     # -> release (SemVer bump, CHANGELOG, tag, push)
 /swe issues [plan.md]   # -> github-issues-script (batch GitHub issues)
@@ -17,7 +21,7 @@ The **`/swe`** skill serves as the central command router and dispatcher for the
 /swe help               # -> displays the routing table
 ```
 
-Aliases: `arch`, `architecture` (review); `cov` (coverage); `tag`, `semver` (release); `tickets` (issues). Anything else is treated as freeform intent, and an ambiguous request shows the menu. `/swe release` and `/swe install` always ask before pushing or installing.
+Aliases: `arch`, `architecture` (review); `diff`, `review-pr` (pr); `execute` (refactor); `schema`, `openapi`, `contract` (api); `dependencies`, `security`, `cve` (deps); `cov` (coverage); `tag`, `semver` (release); `tickets` (issues). Anything else is treated as freeform intent, and an ambiguous request shows the menu. `/swe release` and `/swe install` always ask before pushing or installing.
 
 ---
 
@@ -33,31 +37,44 @@ Entry point for the SWE Skills suite. Dispatches subcommands, and freeform reque
 
 Conducts a multi-tiered architecture and code review of any codebase using graph-based structural analysis (Graphify/AST), maps major components, performs intra- and inter-module reviews, and generates a structured, prioritized improvement plan saved directly into the repository.
 
-#### Key Features:
-- **Interactive Graphify Integration**: Prompts the user for permission/preference to install and execute `graphify` or fallback to deep static AST inspection.
-- **Topological & Component Mapping**: Maps boundaries across presentation, domain core, data access, and infrastructure layers with Mermaid diagrams.
-- **Within-Component (Intra-Module) Review**: Evaluates Single Responsibility Principle (SRP), cohesion, type safety, and error-handling resilience.
-- **Across-Component (Inter-Module) Review**: Evaluates coupling metrics, circular dependency risks, and leaky abstractions.
-- **Comprehensive Improvement Plan**: Saves a version-controlled plan with 5 mandatory sections:
-  1. Code Architecture & System Topology
-  2. Code Module / Component Review
-  3. Code Inter-Module Review
-  4. Recommended Improvements (Prioritized Roadmap: P0/P1/P2/P3 with code refactoring snippets)
-  5. Security Review Recommendations (Cross-referencing OWASP/CVE and suggesting automated security scans)
+### 3. `pr-review`
+**Path:** [`skills/pr-review/SKILL.md`](skills/pr-review/SKILL.md)
 
-### 2. `test-coverage`
+Comprehensive automated pull request and git diff review skill:
+- **Multi-Lens Code Audit**: Evaluates logic/correctness, architectural boundaries, breaking API changes, error handling/silent failures, test coverage, and security.
+- **Structured Review Output**: Produces formatted PR reviews with blocking findings, non-blocking suggestions, and concrete code transformations.
+- **GitHub CLI Integration**: Submits reviews directly via `gh pr review` (`--approve`, `--request-changes`, `--comment`).
+
+### 4. `refactor-execute`
+**Path:** [`skills/refactor-execute/SKILL.md`](skills/refactor-execute/SKILL.md)
+
+Safely executes complex architectural refactoring plans (e.g. from `ARCHITECTURE_REVIEW.md` Phase P0/P1) step-by-step:
+- **Invariant Safety Loop**: Enforces green baseline tests before touching code, breaks transformations into atomic micro-steps, and runs tests after each step.
+- **Martin Fowler Recipes**: Applies Dependency Inversion, Strategy patterns, Method/Class Extraction, and Branch by Abstraction.
+- **Atomic Commits & Logging**: Creates atomic conventional commits and tracks progress in `docs/REFACTOR_LOG.md`.
+
+### 5. `api-contract-audit`
+**Path:** [`skills/api-contract-audit/SKILL.md`](skills/api-contract-audit/SKILL.md)
+
+Audits API contracts (OpenAPI/Swagger, GraphQL, Protobuf, DTOs) against backend route implementations:
+- **Schema Drift Detection**: Flags fields declared in specifications that are missing, renamed, or mismatching in backend controllers.
+- **Undocumented Properties & Endpoints**: Detects unmapped endpoints and data leaking past boundary DTOs.
+- **Breaking Changes & Nullability**: Identifies breaking signature changes and nullability mismatches before shipping to clients.
+
+### 6. `dependency-audit`
+**Path:** [`skills/dependency-audit/SKILL.md`](skills/dependency-audit/SKILL.md)
+
+Multi-ecosystem package security and dependency auditor across Node.js/TS, Python, Rust, Go, Java, and Ruby:
+- **CVE Vulnerability Scanning**: Integrates native tools (`npm audit`, `pip-audit`, `cargo audit`, `govulncheck`, `osv-scanner`) to classify CVSS risk.
+- **Outdated & Abandoned Packages**: Identifies major version lag, abandoned libraries, and excessive dependencies.
+- **License Compliance Guardrails**: Audits permissive vs. high-risk copyleft licenses (GPL/AGPL).
+
+### 7. `test-coverage`
 **Path:** [`skills/test-coverage/SKILL.md`](skills/test-coverage/SKILL.md)
 
 Audits a repository's test suite and produces real coverage analysis — not just "tests pass." Detects the language/framework, runs the appropriate coverage tool, and generates a prioritized (P0 critical-path / P1 core-logic / P2 edge-case) gap-closing plan saved into the repo.
 
-#### Key Features:
-- **Multi-Language Coverage Matrix**: `references/COVERAGE_TOOLS_MATRIX.md` maps 10 ecosystems (Bash, JS/TS, Python, Go, Rust, Java, Ruby, C/C++, .NET, PHP) to their coverage tooling.
-- **Empirically-Verified Bash/bats Guidance**: `references/BASH_COVERAGE_NOTES.md` documents real, tested kcov+bats-core failure modes (runaway recursive trap output, silently-zero coverage, per-file misattribution) and the exact flags that avoid them — not assumed from docs.
-- **`shell_function_reachability.sh`**: a zero-dependency, deterministic static coverage fallback for Bash projects — cross-references every defined function against the test corpus, since instrumented coverage tooling for bats-tested shell code is genuinely unreliable.
-- **Shell Test-Quality Checklist**: catches correctness bugs raw coverage percentage can't — `set -e` interaction bugs invisible to bats (which doesn't run under `-e`), unmocked external commands, command-string injection, and silent dispatch-table no-ops.
-- **Prioritized Gap Analysis**: classifies every untested function by what it actually does (security/destructive-path P0, core-logic P1, edge-case P2), not just raw percentage.
-
-### 3. `release`
+### 8. `release`
 **Path:** [`skills/release/SKILL.md`](skills/release/SKILL.md)
 
 Automates the Semantic Versioning (SemVer 2.0.0) release workflow:
@@ -67,7 +84,7 @@ Automates the Semantic Versioning (SemVer 2.0.0) release workflow:
 - **Safe Remote Push**: Automatically pushes commits and release tags to the remote repository (`git push && git push --tags`).
 - **CLI Release Tool**: Includes [`skills/release/scripts/release.sh`](skills/release/scripts/release.sh) with `--dry-run`, `--minor`, `--patch`, and `--major` options.
 
-### 4. `github-issues-script`
+### 9. `github-issues-script`
 **Path:** [`skills/github-issues-script/SKILL.md`](skills/github-issues-script/SKILL.md)
 
 Prepares and converts code review findings, architectural debt, or task backlogs into a structured, reviewable batch script (`scripts/create_issues.sh`) for GitHub:
