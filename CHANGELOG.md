@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v0.3.0] - 2026-09-22
+
+### Added
+- add pr-review, refactor-execute, api-contract-audit, and dependency-audit skills
+
+
 
 ## [v0.2.0] - 2026-09-18
 
