@@ -21,6 +21,7 @@ REQUIRED_APPROVALS=1
 REQUIRE_SIGNED_COMMITS=true
 ENABLE_SECRET_SCANNING=true
 ENABLE_PUSH_PROTECTION=true
+ALLOW_ADMIN_BYPASS=true
 SET_VISIBILITY=""
 ADD_COLLABORATOR=""
 COLLABORATOR_PERMISSION="push"
@@ -43,6 +44,7 @@ usage() {
     echo "  --private                             Set repository visibility to private"
     echo "  --approvals <count>                   Required approving review count (default: 1)"
     echo "  --signed-commits <true|false>         Require signed commits (default: true)"
+    echo "  --admin-bypass <true|false>           Allow repository administrators to bypass rules (default: true)"
     echo "  --add-collaborator <username>         Invite / add a collaborator"
     echo "  --permission <pull|push|maintain|admin> Permission level for collaborator (default: push)"
     echo "  --list-collaborators                  List all active repository collaborators"
@@ -84,6 +86,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --signed-commits)
             REQUIRE_SIGNED_COMMITS="$2"
+            shift 2
+            ;;
+        --admin-bypass)
+            ALLOW_ADMIN_BYPASS="$2"
             shift 2
             ;;
         --add-collaborator)
@@ -213,9 +219,8 @@ echo -e "Target Account/Org: ${BOLD}${CYAN}$(echo "$FULL_REPO" | cut -d'/' -f1)$
 echo -e "Target Repository:  ${BOLD}${GREEN}${FULL_REPO}${NC}"
 
 # 1. Fetch Repository Metadata
-REPO_INFO=$(gh api "repos/${FULL_REPO}" --jq '{name: .name, default_branch: .default_branch, private: .private, visibility: .visibility}')
+REPO_INFO=$(gh api "repos/${FULL_REPO}" --jq '{name: .name, default_branch: .default_branch, visibility: .visibility}')
 DEFAULT_BRANCH=$(echo "$REPO_INFO" | jq -r '.default_branch // "main"')
-IS_PRIVATE=$(echo "$REPO_INFO" | jq -r '.private')
 VISIBILITY=$(echo "$REPO_INFO" | jq -r '.visibility')
 
 echo -e "Default Branch:     ${BOLD}${DEFAULT_BRANCH}${NC}"
@@ -229,11 +234,6 @@ if [ -n "$SET_VISIBILITY" ] && [ "$SET_VISIBILITY" != "$VISIBILITY" ]; then
         gh repo edit "$FULL_REPO" --visibility "$SET_VISIBILITY" --accept-visibility-change-consequences
         echo -e "${GREEN}✓ Repository visibility updated to ${SET_VISIBILITY}.${NC}"
         VISIBILITY="$SET_VISIBILITY"
-        if [ "$SET_VISIBILITY" = "private" ]; then
-            IS_PRIVATE=true
-        else
-            IS_PRIVATE=false
-        fi
     else
         echo -e "${YELLOW}[DRY RUN] Would update visibility to ${SET_VISIBILITY}.${NC}"
     fi
@@ -277,6 +277,18 @@ fi
 # 4. Construct Ruleset Payload
 echo -e "${BLUE}Building Recommended Protection Ruleset for '${DEFAULT_BRANCH}'...${NC}"
 
+CODE_OWNER_REQUIRED=true
+LAST_PUSH_APPROVAL_REQUIRED=true
+if [ "$REQUIRED_APPROVALS" -eq 0 ] 2>/dev/null; then
+    CODE_OWNER_REQUIRED=false
+    LAST_PUSH_APPROVAL_REQUIRED=false
+fi
+
+BYPASS_ACTORS_JSON="[]"
+if [ "$ALLOW_ADMIN_BYPASS" = "true" ]; then
+    BYPASS_ACTORS_JSON='[{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}]'
+fi
+
 RULES_JSON=$(cat << EOF
 {
   "name": "Protect Default Branch (${DEFAULT_BRANCH})",
@@ -302,8 +314,8 @@ RULES_JSON=$(cat << EOF
       "parameters": {
         "required_approving_review_count": ${REQUIRED_APPROVALS},
         "dismiss_stale_reviews_on_push": true,
-        "require_code_owner_review": true,
-        "require_last_push_approval": true,
+        "require_code_owner_review": ${CODE_OWNER_REQUIRED},
+        "require_last_push_approval": ${LAST_PUSH_APPROVAL_REQUIRED},
         "required_review_thread_resolution": true
       }
     },
@@ -311,7 +323,7 @@ RULES_JSON=$(cat << EOF
       "type": "required_linear_history"
     }
   ],
-  "bypass_actors": []
+  "bypass_actors": ${BYPASS_ACTORS_JSON}
 }
 EOF
 )
@@ -352,12 +364,12 @@ echo -e "Summary of Active Protections on ${BOLD}${FULL_REPO}${NC}:"
 echo -e "  • ${GREEN}✓${NC} Branch: Default branch ('${DEFAULT_BRANCH}') dynamically covered"
 echo -e "  • ${GREEN}✓${NC} Pull Requests: Required (at least ${REQUIRED_APPROVALS} approval)"
 echo -e "  • ${GREEN}✓${NC} Stale Approvals: Dismissed on new commits"
-echo -e "  • ${GREEN}✓${NC} Code Owner Reviews: Required (via CODEOWNERS)"
+echo -e "  • ${GREEN}✓${NC} Code Owner Reviews: $([ "$CODE_OWNER_REQUIRED" = "true" ] && echo "Required (via CODEOWNERS)" || echo "Disabled")"
 echo -e "  • ${GREEN}✓${NC} Thread Resolution: All review conversations must be resolved"
 echo -e "  • ${GREEN}✓${NC} Signed Commits: $([ "$REQUIRE_SIGNED_COMMITS" = "true" ] && echo "Required (GPG/SSH)" || echo "Optional")"
 echo -e "  • ${GREEN}✓${NC} Force Pushes: Blocked (non_fast_forward)"
 echo -e "  • ${GREEN}✓${NC} Branch Deletion: Blocked"
-echo -e "  • ${GREEN}✓${NC} Administrator Bypass: Disabled (Rules enforced equally on admins)"
+echo -e "  • ${GREEN}✓${NC} Administrator Bypass: $([ "$ALLOW_ADMIN_BYPASS" = "true" ] && echo "Enabled (Admins can bypass)" || echo "Disabled (Enforced on admins)")"
 echo -e "  • ${GREEN}✓${NC} Secret Scanning & Push Protection: Active"
 echo ""
 echo -e "Settings URL: ${CYAN}https://github.com/${FULL_REPO}/settings/rules${NC}"
